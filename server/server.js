@@ -1,34 +1,51 @@
 import express from "express";
 import cors from "cors";
-import { readdirSync } from 'fs';
-import path from 'path';
+import { readdirSync } from "fs";
+import path from "path";
+import mongoose from "mongoose";
 import morgan from "morgan";
-import dotenv from 'dotenv';
-dotenv.config();
+import dotenv from "dotenv";
 
-// create express app
+dotenv.config(); // Load environment variables
+
+// Create express app
 const app = express();
 
-//apply middlewares
+// Apply middlewares
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
-app.use(() => console.log("this is my own middleware"));
-
+app.use((req, res, next) => {
+  console.log("This is my own middleware");
+  next();
+});
 
 // Dynamically import all route files from the routes folder
-const routesDir = './routes';
+const routesDir = "./routes";
 
-// Use an async IIFE (Immediately Invoked Function Expression) to await dynamic imports
-(async () => {
+// Define the port
+const port = process.env.PORT || 8000;
+
+// Function to set up routes
+const setupRoutes = async () => {
   const files = readdirSync(routesDir);
+  // console.log("Files found in routes directory:", files);
 
   for (const file of files) {
     const route = await import(path.resolve(routesDir, file));
-    app.use('/api', route.default); // Use route.default since ES modules use `default` export
+    // console.log("Route imported:", route);
+    app.use("/api", route.default); // Use route.default since ES modules use `default` export
   }
-})();
+};
 
-//port
-const port = process.env.PORT || 8000;
-app.listen(port, () => console.log(`server is running on port ${port}`));
+// Connect to the database and then set up routes
+mongoose
+  .connect(process.env.DATABASE)
+  .then(async () => {
+    console.log("**DB CONNECTED**");
+    await setupRoutes(); // Call the function to set up routes after DB connection
+    app.listen(port, () =>
+      console.log(`Server is running on http://localhost:${port}`)
+    );
+  })
+  .catch((err) => console.log("DB CONNECTION ERR => ", err));
