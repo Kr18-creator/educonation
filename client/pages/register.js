@@ -11,22 +11,23 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.table({name, email, password});
     try {
       setLoading(true);
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API}/register`, {
+      // Note the relative URL here
+      const { data } = await axios.post(`/api/register`, {
         name,
         email,
         password,
       });
-      // console.log("REGISTER RESPONSE", data)
       toast.success("Registration successful. Please login.");
       setLoading(false);
     } catch (err) {
+      console.log("err", err);
       toast.error(err.response.data);
       setLoading(false);
     }
   };
+
   return (
     <>
       <h1 className="jumbotron text-center bg-primary square">Register</h1>
@@ -60,7 +61,7 @@ const Register = () => {
             type="submit"
             disabled={!name || !email || !password || loading}
           >
-           {loading ? <SyncOutlined spin />: "Submit"}
+            {loading ? <SyncOutlined spin /> : "Submit"}
           </button>
         </form>
       </div>
