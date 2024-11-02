@@ -1,5 +1,7 @@
 import User from "../models/user.js";
 import { hashPassword, comparePassword } from "../utils/auth.js";
+import jwt from 'jsonwebtoken';
+
 export const register = async (req, res) => {
   console.log("Received request:", req.method, req.url, req.body);
   try {
@@ -41,5 +43,24 @@ export const register = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(400).send("Error. Try again.");
+  }
+};
+
+export const login = async(req, res) => {
+  try {
+    // console.log(req.body);
+    const {email, password}= req.body;
+    //check if db has user with that email
+    const user= await User.findOne({emai}).exec();
+    if(!user){
+      return res.status(400).send("No user found")
+    }
+    // check password
+    const match = await comparePassword(password, user.password);
+    // create signed jwt
+    const token = jwt.sign({_id:user._id})
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Error. Try Again!");
   }
 };
