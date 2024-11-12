@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SyncOutlined } from "@ant-design/icons";
-import Link from 'next/link';
+import Link from "next/link";
+import { Context } from "../context";
 
 const Login = () => {
   const [email, setEmail] = useState("kr040902@gmail.com");
   const [password, setPassword] = useState("password");
   const [loading, setLoading] = useState(false);
+
+  //state
+  const { state, dispatch } = useContext(Context);
+
+  console.log("STATE", state);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +24,11 @@ const Login = () => {
         email,
         password,
       });
-      console.log("LOGIN RESPONSE", data)
+      //console.log("LOGIN RESPONSE", data)
+      dispatch({
+        type: "LOGIN",
+        payload: data,
+      });
     } catch (err) {
       console.log("err", err);
       toast.error(err.response.data);
@@ -31,7 +41,6 @@ const Login = () => {
       <h1 className="jumbotron text-center bg-primary square">Login</h1>
       <div className="container col-md-4 offset-md-4 pb-5">
         <form onSubmit={handleSubmit}>
-        
           <input
             type="email"
             className="form-control mb-4 p-4"
